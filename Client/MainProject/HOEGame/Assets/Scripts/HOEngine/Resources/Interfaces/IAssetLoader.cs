@@ -1,7 +1,16 @@
 ﻿namespace HOEngine.Resources
 {
-    public class IAssetLoader
+    internal interface IAssetLoader:IReference
     {
-        
+        void LoadAssetAsync();
+
+        ELoaderStatus GetLoaderStatus();
+
+        int GetPriority();
+
+        void Pause();
+
+        bool IsLoading { get; set; }
+
     }
 }
