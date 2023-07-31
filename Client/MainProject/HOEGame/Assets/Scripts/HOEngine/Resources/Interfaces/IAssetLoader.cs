@@ -10,7 +10,5 @@
 
         void Pause();
 
-        bool IsLoading { get; set; }
-
     }
 }

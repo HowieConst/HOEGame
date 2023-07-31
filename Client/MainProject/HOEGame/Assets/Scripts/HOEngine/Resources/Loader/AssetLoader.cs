@@ -25,7 +25,6 @@ namespace HOEngine.Resources
         
         public void LoadAssetAsync()
         {
-            IsLoading = true;
             switch (LoaderStatus)
             {
                 case ELoaderStatus.None:
@@ -64,7 +63,6 @@ namespace HOEngine.Resources
             
         }
 
-        public bool IsLoading { get; set; }
 
         //加载Bundle
         private void OnLoadBundleAsync()
@@ -89,7 +87,6 @@ namespace HOEngine.Resources
                 case EResourceMode.Editor:
                     var type = ResourceManager.GetTypeByAssetType(AssetType);
                     AssetObject = AssetDatabase.LoadAssetAtPath(AssetName,type);
-                    IsLoading = false;
                     LoaderStatus = ELoaderStatus.LoadFinish;
                     break;
                 case EResourceMode.AssetBundle:
@@ -105,7 +102,6 @@ namespace HOEngine.Resources
           LoadPriority = 0;
           AssetObject = null;
           LoaderStatus = ELoaderStatus.None;
-          IsLoading = false;
         }
     }
 }
