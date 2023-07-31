@@ -11,6 +11,7 @@ Client/MainProject/HOEGame/[Tt]emp/
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
 Client/MainProject/HOEGame/[Mm]emoryCaptures/
+Client/MainProject/HOEGame/.idea/
 
 # Recordings can get excessive in size
 Client/MainProject/HOEGame/[Rr]ecordings/
