@@ -112,9 +112,9 @@ namespace HOEngine.Resources
         //等待加载
         Wait = 1,
         //正在加载Bundle
-        LoadBundle,
-        //加载Bundle完成
-        LoadBundleFinish,
+        LoadBundleDependencyFinish,
+     
+        LoadBunldeFinish,
         //加载资源
         LoadAsset,
         //加载资源完成

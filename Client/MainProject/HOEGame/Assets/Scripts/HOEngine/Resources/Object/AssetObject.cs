@@ -5,35 +5,38 @@ namespace HOEngine.Resources
     /// <summary>
     /// 资源对象
     /// </summary>
-    public class AssetObject :IReference
+    public class AssetObject :IReference,IResourceObject
     {
         /// <summary>
         /// 资源对象
         /// </summary>
-        public Object Asset { get; protected set; }
 
+        public Object ResourceObject { get; private set; }
+        
+        
+        /// <summary>
+        /// 引用次数
+        /// </summary>
+        public int ReferenceCount { get;private set; }
+        
         /// <summary>
         /// 资源名称
         /// </summary>
-        public string AssetName { get; private set; }
+        public string Name { get;private set; }
+
 
         /// <summary>
         /// 资源类型
         /// </summary>
         public EAssetType AssetType{ get; private set; }
 
-        /// <summary>
-        /// 引用次数
-        /// </summary>
-        public int ReferenceCount { get; private set; }
 
         /// <summary>
         /// 是否加载完成
         /// </summary>
         public bool IsLoaded { get; private set; }
 
-        protected Queue<AssetLoadCallBack> CallBackQueue;
-
+        private Queue<AssetLoadCallBack> CallBackQueue;
 
         /// <summary>
         /// 初始化 
@@ -41,8 +44,9 @@ namespace HOEngine.Resources
         /// <param name="assetName"></param>
         public void Init(string assetName)
         {
-            AssetName = assetName;
+            Name = assetName;
         }
+
 
         /// <summary>
         /// 添加引用计数
@@ -68,9 +72,10 @@ namespace HOEngine.Resources
         public void SetAssetObject(EAssetType assetType,Object assetObject)
         {
             IsLoaded = true;
-            Asset = assetObject;
+            ResourceObject = assetObject;
             AssetType = assetType;
 
+            ExecuteLoadCallBack();
         }
 
         /// <summary>
@@ -93,7 +98,7 @@ namespace HOEngine.Resources
                 while (CallBackQueue.Count > 0)
                 {
                     var callBack = CallBackQueue.Dequeue();
-                    callBack.Invoke(Asset);
+                    callBack.Invoke(ResourceObject);
                 }
             }
         }
@@ -101,11 +106,11 @@ namespace HOEngine.Resources
         /// <summary>
         /// 销毁资源
         /// </summary>
-        public void DestroyAsset()
+        public void UnLoad()
         {
-            if(Asset == null)
+            if(ResourceObject == null)
                 return;
-            UnityEngine.Resources.UnloadAsset(Asset);
+            UnityEngine.Resources.UnloadAsset(ResourceObject);
         }
         
         /// <summary>
@@ -115,8 +120,8 @@ namespace HOEngine.Resources
         {
             IsLoaded = false;
             ReferenceCount = 0;
-            AssetName = "";
-            Asset = null;
+            Name = "";
+            ResourceObject = null;
             AssetType = EAssetType.Object;
             CallBackQueue?.Clear();
             CallBackQueue = null;

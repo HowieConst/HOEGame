@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using UnityEditorInternal;
+using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace HOEngine.Resources
@@ -9,29 +8,56 @@ namespace HOEngine.Resources
     /// <summary>
     /// 资源管理器
     /// </summary>
-    public static class ResourceManager
+    public  class ResourceManager :Singlton<ResourceManager>,IEngineManager
     {
         /// <summary>
         /// 是否准备完成
         /// </summary>
-        public static bool IsReady;
+        public  bool IsReady;
 
-        public static EResourceMode ResourceMode;
+        public  EResourceMode ResourceMode;
 
-        private static LinkedList<IAssetLoader> AssetLoaders;
+        private LinkedList<IResourceLoader> ResLoaders;
+
+        private const  int MAX_LOAD_ASSET_COUNT = 10;
+
+        private  int LoadAssetCount;
 
 
-
-        private static int MAX_LOAD_ASSET_COUNT = 10;
-
-        private static int LoadAssetCount;
-
-        public static void Init(EResourceMode mode)
+        #region Interface
+        public void Init(params object[] param)
         {
-            ResourceMode = mode;
-            AssetLoaders = new LinkedList<IAssetLoader>();
+            ResLoaders = new LinkedList<IResourceLoader>();
             LoadAssetCount = 0;
+            if (param.Length > 0)
+            {
+                if (param[0] != null)
+                {
+                    ResourceMode = param[0] as EResourceMode? ?? EResourceMode.None;
+                }
+            }
+
+            if (ResourceMode == EResourceMode.None)
+            {
+                Debug.LogError("初始化失败---");
+            }
         }
+
+        public void Update()
+        {
+        }
+
+        public void Clear()
+        {
+        }
+
+        public void Dispose()
+        {
+        }
+        
+
+        #endregion
+        
 
         /// <summary>
         /// 加载资源
@@ -41,7 +67,7 @@ namespace HOEngine.Resources
         /// <param name="assetType"></param>资源类型
         /// <param name="type"></param>类型
         /// <param name="callBack"></param>回调
-        public static void LoadAsset(string assetName, int priority, EAssetType assetType, Type type,
+        public  void LoadAsset(string assetName, int priority, EAssetType assetType,
             Action<string, Object> callBack)
         {
             AssetLoadCallBack loadCallBack = ReferencePool.Acquire<AssetLoadCallBack>();
@@ -54,7 +80,7 @@ namespace HOEngine.Resources
             }
 
             //获取资源引用对象
-            AssetObject assetObject = AssetManager.LoadAsset(assetName);
+            AssetObject assetObject = AssetManager.Instacne().LoadAsset(assetName);
             if (assetObject != null)
             {
                 //存在资源对象 有可能是加载完成或者正在加载
@@ -73,35 +99,41 @@ namespace HOEngine.Resources
                 return;
             }
 
-            assetObject = AssetManager.CreateAsset(assetName);
+            assetObject = AssetManager.Instacne().CreateAsset(assetName);
             assetObject.AddReference();
             assetObject.AddLoadCallBack(loadCallBack);
-            var assetLoader = ReferencePool.Acquire<AssetLoader>();
-            assetLoader.Init(assetName,assetType,priority);
-            AssetLoaders.AddLast(assetLoader);
+
+
+            if (ResourceMode == EResourceMode.AssetBundle)
+            {
+                var assetLoader = ReferencePool.Acquire<AssetLoader>();
+                assetLoader.Init(assetName,assetType,priority);
+                ResLoaders.AddLast(assetLoader);
+            }
+            else
+            {
+                var bundleLoader = ReferencePool.Acquire<BundleLoader>();
+                bundleLoader.Init(assetName,assetType,priority);
+                ResLoaders.AddLast(bundleLoader);
+            }
             SortByPriority();
         }
 
-        public static void Update()
+        private void UpdateLoader()
         {
-            
-        }
-
-        private static void UpdateLoader()
-        {
-            if(AssetLoaders.Count <= 0)
+            if(ResLoaders.Count <= 0)
                 return;
             LoadAssetCount = 0;
-            var current = AssetLoaders.First;
+            var current = ResLoaders.First;
             while (current != null)
             {
                 LoadAssetCount += 1;
-                IAssetLoader assetLoader = current.Value;
-                assetLoader.LoadAssetAsync();
+                IResourceLoader resLoader = current.Value;
+                resLoader.LoadAssetAsync();
                 //正在加载的loader
-                var loaderStatus = assetLoader.GetLoaderStatus();
+                var loaderStatus = resLoader.GetLoaderStatus();
                 //加载完成
-                if (loaderStatus == ELoaderStatus.LoadBundleFinish)
+                if (loaderStatus == ELoaderStatus.LoadBunldeFinish)
                 {
                     LoadAssetCount -= 1;
                     current = current.Next;
@@ -109,8 +141,8 @@ namespace HOEngine.Resources
                 }
                 if (loaderStatus == ELoaderStatus.LoadFinish)
                 {
-                    AssetLoaders.Remove(assetLoader);
-                    ReferencePool.Release(assetLoader);
+                    ResLoaders.Remove(resLoader);
+                    ReferencePool.Release(resLoader);
                     continue;
                 }
 
@@ -126,11 +158,11 @@ namespace HOEngine.Resources
         /// <summary>
         /// 根据优先级进行排序 待测试
         /// </summary>
-        private static void SortByPriority()
+        private  void SortByPriority()
         {
-            AssetLoaders.Sort((a,b) => a.GetPriority().CompareTo(b.GetPriority()));
+            ResLoaders.Sort((a,b) => a.GetPriority().CompareTo(b.GetPriority()));
             //不包含的暂停
-            var current = AssetLoaders.First;
+            var current = ResLoaders.First;
             var count = 0;
             //保证每帧最多加载最大数量
             while (current != null)
@@ -168,10 +200,11 @@ namespace HOEngine.Resources
                     type = typeof(UnityEngine.GameObject);
                     break;
                 default:
-                    type = typeof(UnityEngine.Object);
+                    type = typeof(Object);
                     break;
             }
             return type;
         }
+
     }
 }

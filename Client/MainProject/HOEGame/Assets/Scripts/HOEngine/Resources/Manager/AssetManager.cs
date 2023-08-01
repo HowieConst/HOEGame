@@ -5,7 +5,7 @@ namespace HOEngine.Resources
     /// <summary>
     /// Asset 对象管理类
     /// </summary>
-    internal static class AssetManager
+    internal class AssetManager :Singlton<AssetManager>,IEngineManager
     {
         private static Dictionary<string, AssetObject> AssetObjectMap;
 
@@ -19,7 +19,7 @@ namespace HOEngine.Resources
         /// </summary>
         /// <param name="assetName"></param>
         /// <returns></returns>
-        public static AssetObject LoadAsset(string assetName)
+        public  AssetObject LoadAsset(string assetName)
         {
             return AssetObjectMap.TryGetValue(assetName, out var assetObject) ? assetObject : null;
         }
@@ -29,7 +29,7 @@ namespace HOEngine.Resources
         /// </summary>
         /// <param name="assetName"></param>
         /// <returns></returns>
-        public static AssetObject CreateAsset(string assetName)
+        public  AssetObject CreateAsset(string assetName)
         {
             var assetObject = ReferencePool.Acquire<AssetObject>();
             assetObject.Init(assetName);
@@ -41,7 +41,7 @@ namespace HOEngine.Resources
         /// 释放资源对象
         /// </summary>
         /// <param name="assetName"></param>
-        public static void ReleaseAsset(string assetName)
+        public  void ReleaseAssets(string assetName)
         {
             var assetObject = LoadAsset(assetName);
             if (assetObject == null)
@@ -50,13 +50,26 @@ namespace HOEngine.Resources
             ReferencePool.Release(assetObject);
         }
 
-        public static void Clear()
+        public void Init(params object[] param)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void Update()
+        {
+        }
+
+        public  void Clear()
         {
             foreach (var item in AssetObjectMap)
             {
                 ReferencePool.Release(item.Value);
             }
             AssetObjectMap.Clear();
+        }
+
+        public void Dispose()
+        {
         }
     }
 }
