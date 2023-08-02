@@ -1,14 +1,21 @@
 ﻿using System.Collections.Generic;
+using UnityEngine.UI;
 
 namespace HOEngine.Resources
 {
     /// <summary>
     /// Asset 对象管理类
     /// </summary>
-    internal class AssetManager :Singlton<AssetManager>,IEngineManager
+    internal sealed class AssetManager :Singlton<AssetManager>,IEngineManager
     {
+        
+        private AssetManager()
+        {
+            
+        }
         private  Dictionary<string, AssetObject> AssetObjectMap;
 
+     
         /// <summary>
         /// 根据名字获取资源对象
         /// </summary>

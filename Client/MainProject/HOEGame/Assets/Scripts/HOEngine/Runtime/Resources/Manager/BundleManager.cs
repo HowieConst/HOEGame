@@ -2,13 +2,21 @@
 
 namespace HOEngine.Resources
 {
-    public class BundleManager : Singlton<BundleManager> , IEngineManager
+    internal sealed class BundleManager : Singlton<BundleManager> , IEngineManager
     {
+        
+        private BundleManager()
+        {
+            
+        }
+        
         private Dictionary<string, BundleObject> BundleMaps;
 
         private Dictionary<string, string> AssetBundleReferenceMap;
 
         private Dictionary<string, List<string>> BundleDependencyMap;
+
+
 
         public void Init(params object[] param)
         {

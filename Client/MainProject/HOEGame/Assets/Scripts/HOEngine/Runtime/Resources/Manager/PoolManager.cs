@@ -2,8 +2,12 @@
 
 namespace HOEngine.Resources
 {
-    public class PoolManager :Singlton<PoolManager>,IEngineManager
+    internal sealed class PoolManager :Singlton<PoolManager>,IEngineManager
     {
+        private PoolManager()
+        {
+            
+        }
 
         private Dictionary<string, PoolObject> PoolObjectsMap;
 

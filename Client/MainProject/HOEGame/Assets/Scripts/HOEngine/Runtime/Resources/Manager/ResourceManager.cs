@@ -8,8 +8,13 @@ namespace HOEngine.Resources
     /// <summary>
     /// 资源管理器
     /// </summary>
-    public  class ResourceManager :Singlton<ResourceManager>,IEngineManager
+    internal sealed  class ResourceManager :Singlton<ResourceManager>,IEngineManager
     {
+        
+        private ResourceManager()
+        {
+            
+        }
         /// <summary>
         /// 是否准备完成
         /// </summary>
@@ -23,6 +28,7 @@ namespace HOEngine.Resources
 
         private  int LoadAssetCount;
 
+     
 
         #region Interface
         public void Init(params object[] param)

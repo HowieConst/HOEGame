@@ -1,21 +1,38 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Dynamic;
+using UnityEngine;
+using System.Reflection;
+using Object = UnityEngine.Object;
+
 namespace HOEngine
 {
-    public class Singlton<T> where T:new()
+    /// <summary>
+    /// 单例类 必须包含私有构造 防止外部创建
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public class Singlton<T> where T:class
     {
         private static T mInstance;
+
+        private static readonly object LockObj = new object();
 
         public static T Instacne()
         {
             if (mInstance == null)
             {
-                mInstance = new T();
+                lock (LockObj)
+                {
+                    mInstance = (T)Activator.CreateInstance(typeof(T),true);
+                }
             }
-
             return mInstance;
         }
     }
 
+    /// <summary>
+    /// Mono 单例
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class MonoSinglton<T> where T:MonoBehaviour
     {
         public static T Instance()
