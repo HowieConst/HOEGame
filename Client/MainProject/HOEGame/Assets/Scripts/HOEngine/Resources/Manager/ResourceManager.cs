@@ -15,7 +15,7 @@ namespace HOEngine.Resources
         /// </summary>
         public  bool IsReady;
 
-        public  EResourceMode ResourceMode;
+        private EResourceMode ResourceMode;
 
         private LinkedList<IResourceLoader> ResLoaders;
 
@@ -45,6 +45,7 @@ namespace HOEngine.Resources
 
         public void Update()
         {
+            UpdateLoader();
         }
 
         public void Clear()
@@ -67,7 +68,7 @@ namespace HOEngine.Resources
         /// <param name="assetType"></param>资源类型
         /// <param name="type"></param>类型
         /// <param name="callBack"></param>回调
-        public  void LoadAsset(string assetName, int priority, EAssetType assetType,
+        internal  void LoadAsset(string assetName, int priority, EAssetType assetType,
             Action<string, Object> callBack)
         {
             AssetLoadCallBack loadCallBack = ReferencePool.Acquire<AssetLoadCallBack>();
@@ -80,7 +81,7 @@ namespace HOEngine.Resources
             }
 
             //获取资源引用对象
-            AssetObject assetObject = AssetManager.Instacne().LoadAsset(assetName);
+            var assetObject = AssetManager.Instacne().LoadAsset(assetName);
             if (assetObject != null)
             {
                 //存在资源对象 有可能是加载完成或者正在加载
@@ -88,12 +89,11 @@ namespace HOEngine.Resources
                 //加载完成处理
                 if (assetObject.IsLoaded)
                 {
-                    //todo:
-                    
+                    var obj = assetObject.GetObject();
+                    loadCallBack.Invoke(obj);
                 }
                 else
                 {
-                    //todo:没加载完成添加回调
                     assetObject.AddLoadCallBack(loadCallBack);
                 }
                 return;
@@ -104,7 +104,7 @@ namespace HOEngine.Resources
             assetObject.AddLoadCallBack(loadCallBack);
 
 
-            if (ResourceMode == EResourceMode.AssetBundle)
+            if (ResourceMode == EResourceMode.Editor)
             {
                 var assetLoader = ReferencePool.Acquire<AssetLoader>();
                 assetLoader.Init(assetName,assetType,priority);
@@ -117,6 +117,31 @@ namespace HOEngine.Resources
                 ResLoaders.AddLast(bundleLoader);
             }
             SortByPriority();
+        }
+
+        public void LoadInstance(string assetName,int priority,EAssetType assetType,Action<string,GameObject> callBack)
+        {
+            var poolObject = PoolManager.Instacne().EnSurePoolObject(assetName);
+            if (poolObject.IsLoaded)
+            {
+                //加载完成
+                var gameObject = poolObject.GetInstance();
+                if (callBack != null)
+                {
+                    callBack.Invoke(assetName,gameObject);
+                }
+                return;
+            }
+            LoadAsset(assetName,priority, assetType, (name,obj) =>
+            {
+                poolObject.SetResourceObject(obj);
+                var gameObject = poolObject.GetInstance();
+                if (callBack != null)
+                {
+                    callBack.Invoke(assetName,gameObject);
+                }
+            });            
+            
         }
 
         private void UpdateLoader()
@@ -132,15 +157,10 @@ namespace HOEngine.Resources
                 resLoader.LoadAssetAsync();
                 //正在加载的loader
                 var loaderStatus = resLoader.GetLoaderStatus();
-                //加载完成
-                if (loaderStatus == ELoaderStatus.LoadBunldeFinish)
+                if (loaderStatus == ELoaderStatus.LoadFinish)
                 {
                     LoadAssetCount -= 1;
                     current = current.Next;
-                    continue;
-                }
-                if (loaderStatus == ELoaderStatus.LoadFinish)
-                {
                     ResLoaders.Remove(resLoader);
                     ReferencePool.Release(resLoader);
                     continue;
@@ -161,19 +181,6 @@ namespace HOEngine.Resources
         private  void SortByPriority()
         {
             ResLoaders.Sort((a,b) => a.GetPriority().CompareTo(b.GetPriority()));
-            //不包含的暂停
-            var current = ResLoaders.First;
-            var count = 0;
-            //保证每帧最多加载最大数量
-            while (current != null)
-            {
-                count++;
-                if (count > MAX_LOAD_ASSET_COUNT)
-                {
-                    current.Value.Pause();
-                }
-                current = current.Next;
-            }
         }
         
         internal static Type GetTypeByAssetType(EAssetType assetType)

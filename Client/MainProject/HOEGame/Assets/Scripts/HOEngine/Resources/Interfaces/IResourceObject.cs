@@ -8,6 +8,8 @@ namespace HOEngine.Resources
 
         Object ResourceObject { get;}
 
+        void SetResourceObject(EAssetType assetType, Object assetObject);
+
         void Init(string name);
         
         int ReferenceCount { get;}

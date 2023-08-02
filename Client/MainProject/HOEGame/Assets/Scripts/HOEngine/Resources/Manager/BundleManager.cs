@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Collections.Specialized;
 
-namespace HOEngine
+namespace HOEngine.Resources
 {
     public class BundleManager : Singlton<BundleManager> , IEngineManager
     {
@@ -18,16 +17,10 @@ namespace HOEngine
             BundleDependencyMap = new Dictionary<string, List<string>>();
         }
 
-        private void ParseBundleInfo()
-        {
-            
-        }
         public void Update()
         {
-            
         }
-
-        public BundleObject CreateBundleObject(string name)
+        internal BundleObject CreateBundleObject(string name)
         {
             BundleObject bundleObject = ReferencePool.Acquire<BundleObject>();
             bundleObject.Init(name);
@@ -35,7 +28,7 @@ namespace HOEngine
             return bundleObject;
         }
 
-        public BundleObject LoadBundleObject(string name)
+        internal BundleObject LoadBundleObject(string name)
         {
             return BundleMaps.TryGetValue(name, out var bundleObject) ? bundleObject : null;
         }

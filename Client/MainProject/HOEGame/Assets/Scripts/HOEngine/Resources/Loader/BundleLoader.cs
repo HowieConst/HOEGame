@@ -9,11 +9,10 @@ namespace HOEngine.Resources
         private string AssetName;
         private EAssetType AssetType;
         private int LoadPriority;
-        private AssetBundle BundleData;
-        public ELoaderStatus LoaderStatus;
+        private ELoaderStatus LoaderStatus;
 
         private string BundleName;
-        private List<string> bundldLoadList;
+        private List<string> BundleLoadList;
 
         private AssetBundleCreateRequest MainBundleRequest;
         private AssetBundleRequest BundleAssetRequest;
@@ -27,7 +26,7 @@ namespace HOEngine.Resources
             LoadPriority = prority;
             LoaderStatus = ELoaderStatus.Wait;
             BundleName = BundleManager.Instacne().GetBundleName(assetName);
-            bundldLoadList = BundleManager.Instacne().GetBundleDependencies(BundleName);
+            BundleLoadList = BundleManager.Instacne().GetBundleDependencies(BundleName);
             BundleLoadRequest = new Dictionary<string, AssetBundleCreateRequest>();
         }
         public void Clear()
@@ -52,7 +51,7 @@ namespace HOEngine.Resources
                 case ELoaderStatus.LoadBundleDependencyFinish:
                     OnLoadMainBundle();
                     break;
-                case ELoaderStatus.LoadBunldeFinish:
+                case ELoaderStatus.LoadBundleFinish:
                     LoaderStatus = ELoaderStatus.LoadAsset;
                     break;
                 case ELoaderStatus.UnLoad:
@@ -63,12 +62,12 @@ namespace HOEngine.Resources
 
         private void OnLoadBundleDependenciesAsync()
         {
-            if (bundldLoadList == null || bundldLoadList.Count <= 0)
+            if (BundleLoadList == null || BundleLoadList.Count <= 0)
             {
                 LoaderStatus = ELoaderStatus.LoadBundleDependencyFinish;
                 return;
             }
-            foreach (var item in bundldLoadList)
+            foreach (var item in BundleLoadList)
             {
                 var bundleObject = BundleManager.Instacne().LoadBundleObject(item);
                 if (bundleObject == null)
@@ -94,12 +93,12 @@ namespace HOEngine.Resources
                 var bundleObject = BundleManager.Instacne().LoadBundleObject(item.Key);
                 if (bundleObject != null)
                 {
-                    bundleObject.SetBunldeObject(item.Value.assetBundle);
+                    bundleObject.SetResourceObject(item.Value.assetBundle);
                 }
             }
 
             LoaderStatus = ELoaderStatus.LoadBundleDependencyFinish;
-            foreach (var item in bundldLoadList)
+            foreach (var item in BundleLoadList)
             {
                 var bundleObject = BundleManager.Instacne().LoadBundleObject(item);
                 if (bundleObject == null)
@@ -128,7 +127,7 @@ namespace HOEngine.Resources
             MainBundleRequest ??= AssetBundle.LoadFromFileAsync(BundleName);
             if (MainBundleRequest.isDone)
             {
-                bundleObject.SetBunldeObject(MainBundleRequest.assetBundle);
+                bundleObject.SetResourceObject(MainBundleRequest.assetBundle);
                 LoaderStatus = ELoaderStatus.LoadFinish;
             }
         }
@@ -149,7 +148,7 @@ namespace HOEngine.Resources
                 var assetObject = AssetManager.Instacne().LoadAsset(AssetName);
                 if (assetObject != null)
                 {
-                    assetObject.SetAssetObject(AssetType,BundleAssetRequest.asset);
+                    assetObject.SetResourceObject(BundleAssetRequest.asset);
                 }
             }
         }
@@ -163,11 +162,6 @@ namespace HOEngine.Resources
         {
             return LoadPriority;
         }
-
-        public void Pause()
-        {
-        }
-
-        public bool IsLoaded { get; }
+  
     }
 }

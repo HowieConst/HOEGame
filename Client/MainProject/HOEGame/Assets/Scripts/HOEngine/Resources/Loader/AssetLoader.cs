@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEditor;
-using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace HOEngine.Resources
@@ -13,7 +12,7 @@ namespace HOEngine.Resources
         private EAssetType AssetType;
         private int LoadPriority;
         private Object AssetObject;
-        public ELoaderStatus LoaderStatus;
+        private ELoaderStatus LoaderStatus;
 
         public void Init(string assetName,EAssetType assetType,int prority)
         {
@@ -64,7 +63,7 @@ namespace HOEngine.Resources
             var type = ResourceManager.GetTypeByAssetType(AssetType);
             AssetObject = AssetDatabase.LoadAssetAtPath(AssetName,type);
             var assetObject = AssetManager.Instacne().LoadAsset(AssetName);
-            assetObject?.SetAssetObject(AssetType,AssetObject);
+            assetObject?.SetResourceObject(AssetObject);
             LoaderStatus = ELoaderStatus.LoadFinish;
         }
 

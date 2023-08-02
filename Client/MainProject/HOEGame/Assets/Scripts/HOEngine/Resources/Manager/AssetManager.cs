@@ -7,12 +7,7 @@ namespace HOEngine.Resources
     /// </summary>
     internal class AssetManager :Singlton<AssetManager>,IEngineManager
     {
-        private static Dictionary<string, AssetObject> AssetObjectMap;
-
-        static AssetManager()
-        {
-            AssetObjectMap = new Dictionary<string, AssetObject>();
-        }
+        private  Dictionary<string, AssetObject> AssetObjectMap;
 
         /// <summary>
         /// 根据名字获取资源对象
@@ -52,7 +47,7 @@ namespace HOEngine.Resources
 
         public void Init(params object[] param)
         {
-            throw new System.NotImplementedException();
+            AssetObjectMap = new Dictionary<string, AssetObject>();
         }
 
         public void Update()

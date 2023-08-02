@@ -1,4 +1,8 @@
 
+using System;
+using UnityEngine;
+using Object = UnityEngine.Object;
+
 namespace HOEngine.Resources
 {
     /// <summary>
@@ -12,6 +16,8 @@ namespace HOEngine.Resources
         /// <param name="assetName"></param>
         /// <returns></returns>
         bool HasAsset(string assetName);
+
+        void LoadAssetAsync(string name,int priority, EAssetType assetType, Action<string, Object> action);
     }
 }
 

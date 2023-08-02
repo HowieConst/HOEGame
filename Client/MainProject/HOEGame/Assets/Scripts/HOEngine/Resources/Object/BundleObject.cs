@@ -1,46 +1,18 @@
 ﻿using HOEngine.Resources;
 using UnityEngine;
 
-namespace HOEngine
+namespace HOEngine.Resources
 {
-    public class BundleObject :IReference, IResourceObject
+    internal class BundleObject :ResourceObject
     {
-        public string Name { get; private set; }
-        
-        public Object ResourceObject { get; private set; }
-        
-        public void Init(string name)
+        public AssetBundle BundleData => ObjectSource as AssetBundle;
+     
+        public override void UnLoad()
         {
-            Name = name;
-        }
-
-        public int ReferenceCount { get; private set; }
-        
-        public bool IsLoaded { get; private set; }
-        
-        public AssetBundle BundleData => ResourceObject as AssetBundle;
-
-        public void SetBunldeObject(AssetBundle assetBundle)
-        {
-            ResourceObject = assetBundle;
-        }
-        
-        public void AddReference()
-        {
-            ReferenceCount++;
-        }
-
-        public void SubReference()
-        {
-            ReferenceCount--;
-        }
-
-        public void Clear()
-        {
-            Name = "";
-            ResourceObject = null;
-            ReferenceCount = 0;
-            IsLoaded = false;
+            if (BundleData != null)
+            {
+                BundleData.Unload(false);
+            }
         }
     }
 }

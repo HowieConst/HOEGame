@@ -8,9 +8,5 @@
 
         int GetPriority();
 
-        void Pause();
-
-        bool IsLoaded { get; }
-
     }
 }
