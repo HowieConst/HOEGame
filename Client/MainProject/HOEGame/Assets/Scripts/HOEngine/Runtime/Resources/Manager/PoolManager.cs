@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace HOEngine.Resources
 {
@@ -10,6 +11,7 @@ namespace HOEngine.Resources
         }
 
         private Dictionary<string, PoolObject> PoolObjectsMap;
+        private Transform poolRootTrans;
 
         internal PoolObject LoadPoolObject(string name)
         {
@@ -24,20 +26,25 @@ namespace HOEngine.Resources
         {
             var poolObject = ReferencePool.Acquire<PoolObject>();
             poolObject.Init(name);
-            poolObject.AddReference();
+            poolObject.SetPoolRoot(poolRootTrans);
             PoolObjectsMap.Add(name,poolObject);
             return poolObject;
         }
 
-        internal PoolObject EnSurePoolObject(string name)
+        public  void ReleasePoolObject(string name)
         {
-            var poolObject = LoadPoolObject(name) ?? CreatePoolObject(name);
-            return poolObject;
+            var poolObject = LoadPoolObject(name);
+            if (poolObject == null)
+                return;
+            PoolObjectsMap.Remove(name);
+            ReferencePool.Release(poolObject);
         }
 
         public void Init(params object[] param)
         {
             PoolObjectsMap = new Dictionary<string, PoolObject>();
+            poolRootTrans = new GameObject("[POOL]").transform;
+            Object.DontDestroyOnLoad(poolRootTrans.gameObject);
         }
 
         public void Update()

@@ -18,14 +18,10 @@ namespace HOEngine
 
         public static T Instacne()
         {
-            if (mInstance == null)
+            lock (LockObj)
             {
-                lock (LockObj)
-                {
-                    mInstance = (T)Activator.CreateInstance(typeof(T),true);
-                }
+                return mInstance ??= (T)Activator.CreateInstance(typeof(T), true);
             }
-            return mInstance;
         }
     }
 
@@ -33,30 +29,46 @@ namespace HOEngine
     /// Mono 单例
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class MonoSinglton<T> where T:MonoBehaviour
+    public class MonoSinglton<T> : MonoBehaviour where T:MonoBehaviour
     {
+        private static T mInstance;
+        private static readonly object LockObj = new object();
         public static T Instance()
         {
-            var instances = (GameObject[])Object.FindObjectsOfType(typeof(T));
-            if (instances.Length > 0)
+            
+            if (applicationIsQuitting) {  
+                Debug.LogWarning("[Singleton] Instance '"+ typeof(T) +  
+                                 "' already destroyed on application quit." +  
+                                 " Won't create again - returning null.");  
+                return null;  
+            }
+
+            lock (LockObj)
             {
-                if (instances.Length > 1)
+                if (mInstance != null) return mInstance;
+                mInstance = (T)FindObjectOfType(typeof(T));
+                if (FindObjectsOfType(typeof(T)).Length > 1)
                 {
-                    Debug.LogWarning("find multiple instance");
-                    for (int i = 1; i < instances.Length; i++)
-                    {
-                        Object.DestroyImmediate(instances[i]);
-                    }
+                    Debug.LogError("[Singleton] Something went really wrong " +  
+                                   " - there should never be more than 1 singleton!" +  
+                                   " Reopenning the scene might fix it.");  
+                    return mInstance; 
                 }
-                return instances[0].GetComponent<T>();
+                if(mInstance == null)
+                {
+                    var go = new GameObject(typeof(T).Name);
+                    DontDestroyOnLoad(go);
+                    mInstance = go.AddComponent<T>();
+                }
+                return mInstance;
             }
-            else
-            {
-                var go = new GameObject(typeof(T).Name);
-                Object.DontDestroyOnLoad(go);
-                var t = go.AddComponent<T>();
-                return t;
-            }
+     
         }
+        private static bool applicationIsQuitting = false;  
+   
+        public void OnDestroy () {  
+            applicationIsQuitting = true;  
+        } 
+        
     }
 }

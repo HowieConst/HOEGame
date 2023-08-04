@@ -6,7 +6,7 @@
 
         ELoaderStatus GetLoaderStatus();
 
-        int GetPriority();
+        ELoadPriority GetPriority();
 
     }
 }

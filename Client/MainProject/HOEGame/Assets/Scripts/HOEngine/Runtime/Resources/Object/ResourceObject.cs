@@ -5,17 +5,20 @@ namespace HOEngine.Resources
 {
     internal abstract class ResourceObject :IReference
     {
+
         public string Name { get;protected set; }
 
         protected Object ObjectSource;
         
-        protected int ReferenceCount;
+        public int ReferenceCount;
+
         
-        public bool IsLoaded {get;protected set;}
+        public bool IsLoaded {get; private set;}
         
         private Queue<AssetLoadCallBack> CallBackQueue;
 
-        public abstract void UnLoad();
+        public abstract void UnLoad(GameObject go = null);
+        public abstract void Release();
 
         public virtual Object GetObject()
         {

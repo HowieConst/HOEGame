@@ -17,7 +17,7 @@ namespace HOEngine.Resources
         /// <returns></returns>
         bool HasAsset(string assetName);
 
-        void LoadAssetAsync(string name,int priority, EAssetType assetType, Action<string, Object> action);
+        ResHandler LoadAssetAsync(string name,EAssetType assetType,ELoadPriority priority, Action<string, Object> action);
     }
 }
 

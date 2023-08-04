@@ -10,11 +10,11 @@ namespace HOEngine.Resources
 
         private string AssetName;
         private EAssetType AssetType;
-        private int LoadPriority;
+        private ELoadPriority LoadPriority;
         private Object AssetObject;
         private ELoaderStatus LoaderStatus;
 
-        public void Init(string assetName,EAssetType assetType,int prority)
+        public void Init(string assetName,EAssetType assetType,ELoadPriority prority)
         {
             AssetName = assetName;
             AssetType = assetType;
@@ -46,7 +46,7 @@ namespace HOEngine.Resources
             return LoaderStatus;
         }
 
-        public int GetPriority()
+        public ELoadPriority GetPriority()
         {
             return LoadPriority;
         }

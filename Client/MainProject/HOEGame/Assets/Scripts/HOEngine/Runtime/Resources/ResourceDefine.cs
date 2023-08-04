@@ -118,7 +118,17 @@ namespace HOEngine.Resources
         LoadFinish,
         //卸载
         UnLoad,
-        
+    }
+    //卸载类型
+    public enum EReleaseType
+    {
+        RemovePreload,
+        UnloadInstance,
+        RemovePreloadBundle,
+        UnloadScene,
+        UnloadSceneAsset,
+        UnloadAtlas,
+        UnloadAsset,
     }
 }
 

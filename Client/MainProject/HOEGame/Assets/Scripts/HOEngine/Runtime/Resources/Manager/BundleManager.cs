@@ -40,7 +40,6 @@ namespace HOEngine.Resources
         {
             return BundleMaps.TryGetValue(name, out var bundleObject) ? bundleObject : null;
         }
-
         public string GetBundleName(string assetName)
         {
             return AssetBundleReferenceMap.TryGetValue(assetName, out var bundleName) ? bundleName : string.Empty;

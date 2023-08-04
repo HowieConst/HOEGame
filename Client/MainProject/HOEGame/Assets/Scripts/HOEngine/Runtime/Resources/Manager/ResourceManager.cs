@@ -20,7 +20,7 @@ namespace HOEngine.Resources
         /// </summary>
         public  bool IsReady;
 
-        private EResourceMode ResourceMode;
+        public EResourceMode ResourceMode;
 
         private LinkedList<IResourceLoader> ResLoaders;
 
@@ -74,7 +74,7 @@ namespace HOEngine.Resources
         /// <param name="assetType"></param>资源类型
         /// <param name="type"></param>类型
         /// <param name="callBack"></param>回调
-        internal  void LoadAsset(string assetName, int priority, EAssetType assetType,
+        internal  void LoadAsset(string assetName, EAssetType assetType,ELoadPriority priority,
             Action<string, Object> callBack)
         {
             AssetLoadCallBack loadCallBack = ReferencePool.Acquire<AssetLoadCallBack>();
@@ -125,9 +125,10 @@ namespace HOEngine.Resources
             SortByPriority();
         }
 
-        public void LoadInstance(string assetName,int priority,EAssetType assetType,Action<string,GameObject> callBack)
+        public void LoadInstance(string assetName,EAssetType assetType,ELoadPriority priority,Action<string,GameObject> callBack)
         {
-            var poolObject = PoolManager.Instacne().EnSurePoolObject(assetName);
+            var poolObject = PoolManager.Instacne().LoadPoolObject(assetName) ?? PoolManager.Instacne().CreatePoolObject(assetName);
+            poolObject.AddReference();
             if (poolObject.IsLoaded)
             {
                 //加载完成
@@ -138,7 +139,7 @@ namespace HOEngine.Resources
                 }
                 return;
             }
-            LoadAsset(assetName,priority, assetType, (name,obj) =>
+            LoadAsset(assetName,assetType,priority, (name,obj) =>
             {
                 poolObject.SetResourceObject(obj);
                 var gameObject = poolObject.GetInstance();
@@ -148,6 +149,27 @@ namespace HOEngine.Resources
                 }
             });            
             
+        }
+
+        public void UnLoadInstance(string assetName,GameObject gameObject)
+        {
+            var poolObject = PoolManager.Instacne().LoadPoolObject(assetName) ?? PoolManager.Instacne().CreatePoolObject(assetName);
+            poolObject.UnLoad(gameObject);
+        }
+
+        public void UnLoadAsset(string assetName)
+        {
+            var assetObject = AssetManager.Instacne().LoadAsset(assetName);
+            if(assetObject == null)
+                return;
+            
+            string bundleName = BundleManager.Instacne().GetBundleName(assetName);
+            var bundleObject = BundleManager.Instacne().LoadBundleObject(bundleName);
+            if (bundleObject != null)
+            {
+                bundleObject.UnLoad();
+            }
+            assetObject.UnLoad();
         }
 
         private void UpdateLoader()
