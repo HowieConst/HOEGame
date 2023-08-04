@@ -1,19 +1,18 @@
 ﻿using System;
 using UnityEditor;
-using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace HOEngine.Resources
 {
-    //资源加载器 包括bundle加载
-    public class AssetLoader :IAssetLoader
+    //资源加载器(Editor下)
+    public class AssetLoader :IResourceLoader
     {
 
         private string AssetName;
         private EAssetType AssetType;
         private int LoadPriority;
         private Object AssetObject;
-        public ELoaderStatus LoaderStatus;
+        private ELoaderStatus LoaderStatus;
 
         public void Init(string assetName,EAssetType assetType,int prority)
         {
@@ -30,18 +29,12 @@ namespace HOEngine.Resources
                 case ELoaderStatus.None:
                     break;
                 case ELoaderStatus.Wait:
-                    break;
-                case ELoaderStatus.LoadBundle:
-                    OnLoadBundleAsync();
+                    LoaderStatus = ELoaderStatus.LoadAsset;
                     break;
                 case ELoaderStatus.LoadAsset:
                     OnLoadAssetAsync();
                     break;
                 case ELoaderStatus.LoadFinish:
-                    break;
-                case ELoaderStatus.UnLoad:
-                    break;
-                case ELoaderStatus.LoadBundleFinish:
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -63,37 +56,15 @@ namespace HOEngine.Resources
             
         }
 
-
-        //加载Bundle
-        private void OnLoadBundleAsync()
-        {
-            switch (ResourceManager.ResourceMode)
-            {
-                case EResourceMode.Editor:
-                    LoaderStatus = ELoaderStatus.LoadAsset;
-                    break;
-                case EResourceMode.AssetBundle:
-                    //LoadBundle
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
+        public bool IsLoaded => LoaderStatus == ELoaderStatus.LoadFinish;
 
         private void OnLoadAssetAsync()
         {
-            switch (ResourceManager.ResourceMode)
-            {
-                case EResourceMode.Editor:
-                    var type = ResourceManager.GetTypeByAssetType(AssetType);
-                    AssetObject = AssetDatabase.LoadAssetAtPath(AssetName,type);
-                    LoaderStatus = ELoaderStatus.LoadFinish;
-                    break;
-                case EResourceMode.AssetBundle:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            var type = ResourceManager.GetTypeByAssetType(AssetType);
+            AssetObject = AssetDatabase.LoadAssetAtPath(AssetName,type);
+            var assetObject = AssetManager.Instacne().LoadAsset(AssetName);
+            assetObject?.SetResourceObject(AssetObject);
+            LoaderStatus = ELoaderStatus.LoadFinish;
         }
 
         public void Clear()

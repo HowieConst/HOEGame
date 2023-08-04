@@ -101,9 +101,6 @@ namespace HOEngine.Resources
         /// </summary>
         ScriptableObject,
         
-        
-        
-        
     }
 
     public enum ELoaderStatus
@@ -112,8 +109,8 @@ namespace HOEngine.Resources
         //等待加载
         Wait = 1,
         //正在加载Bundle
-        LoadBundle,
-        //加载Bundle完成
+        LoadBundleDependencyFinish,
+     
         LoadBundleFinish,
         //加载资源
         LoadAsset,
