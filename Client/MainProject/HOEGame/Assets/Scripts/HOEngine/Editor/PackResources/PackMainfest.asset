@@ -12,14 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50b39060c19348eea378c1ef4b1d75c8, type: 3}
   m_Name: PackMainfest
   m_EditorClassIdentifier: 
-  serializationData:
-    SerializedFormat: 2
-    SerializedBytes: 
-    ReferencedUnityObjects: []
-    SerializedBytesString: 
-    Prefab: {fileID: 0}
-    PrefabModificationsReferencedUnityObjects: []
-    PrefabModifications: []
-    SerializationNodes: []
-  SrcDir: 
-  PackItems: []
+  SrcDir: Assets/Res
+  PackItems:
+  - SubFolder: Prefabs
+    BundleName: 
+    PackType: 0
+    PackContent: 0
+    SearchFilters: []
+    NecessaryFilters: []
+    ExcludeFilters: []
+    SearchSubDir: 0
+    CheckDependency: 0
+    viewAssetsList:
+    - Assets/Res/Prefabs/Cube.prefab

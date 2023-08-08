@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
-using Sirenix;
 using Sirenix.OdinInspector;
-using Unity.Plastic.Newtonsoft.Json.Bson;
 using UnityEditor;
 
 namespace HOEngine.Editor.PackResources
@@ -33,36 +31,29 @@ namespace HOEngine.Editor.PackResources
             }
         }
 
-        public Dictionary<string, List<string>> PackAllAssets()
+        public void PackAllAssets(ref Dictionary<string,List<string>> result,ref Dictionary<string,HashSet<string>> denpendencies)
         {
             if (PackItems.Count == 0)
-                return null;
-            var result = new Dictionary<string, List<string>>();
+                return ;
             for (int i = 0; i < PackItems.Count; i++)
             {
                 var packItem = PackItems[i];
-                PackAsset(packItem,ref result);
+                PackAsset(packItem,ref result,ref denpendencies);
             }
-
-            return result;
         }
-
-        private void PackAsset(HOEPackItem packItem,ref Dictionary<string,List<string>> result)
+        
+        private void PackAsset(HOEPackItem packItem,ref Dictionary<string,List<string>> result,ref Dictionary<string,HashSet<string>> denpendencies)
         {
-            var fileList = packItem.BuildSrcFileList(SrcDir);
-            if(fileList.Count == 0)
-                return;
-            var bundleName = packItem.BundleName;
             switch (packItem.PackType)
             {
                 case EPackType.One:
-                    PackOneBundle(bundleName,fileList,ref result);
+                    PackOneBundle(packItem,ref result,ref denpendencies);
                     break;
                 case EPackType.PerFile:
-                    PackPerFileBundle(bundleName,fileList, ref result);
+                    PackPerFileBundle(packItem,ref result,ref denpendencies);
                     break;
                 case EPackType.PerDir:
-                    PackPerDirBundle(bundleName, fileList, ref result);
+                    PackPerDirBundle(packItem,ref result,ref denpendencies);
                     break;
                 case EPackType.Scene:
                     break;
@@ -72,20 +63,40 @@ namespace HOEngine.Editor.PackResources
                     throw new ArgumentOutOfRangeException();
             }
         }
-
-        private void PackOneBundle(string BundleName,List<string> fileList,ref Dictionary<string,List<string>> result)
+        
+        private void PackOneBundle(HOEPackItem packItem,ref Dictionary<string,List<string>> result,ref Dictionary<string,HashSet<string>> dependencies)
         {
-            if (!string.IsNullOrEmpty(BundleName))
+            var bundleName = packItem.BundleName;
+            var fileList = packItem.BuildSrcFileList(SrcDir);
+            if (!string.IsNullOrEmpty(bundleName))
             {
-                if (!result.ContainsKey(BundleName))
+                if (!result.ContainsKey(bundleName))
                 {
-                    result.Add(BundleName,fileList.ToList());
+                    bool isCheckDependency = packItem.CheckDependency;
+                    foreach (var item in fileList)
+                    {
+                        if (isCheckDependency)
+                        {
+                            var dependenciesArray = AssetDatabase.GetDependencies(item);
+                            foreach (var dependecy in dependenciesArray)
+                            {
+                                if (!dependencies.ContainsKey(dependecy))
+                                {
+                                    dependencies.Add(dependecy,new HashSet<string>());
+                                }
+                                dependencies[dependecy].Add(bundleName);
+                            }
+                        }
+                    }
+                    result.Add(bundleName,fileList.ToList());
                 }
             }
         }
-
-        private void PackPerFileBundle(string bundleName,List<string> fileList, ref Dictionary<string, List<string>> result)
+        
+        private void PackPerFileBundle(HOEPackItem packItem,ref Dictionary<string, List<string>> result,ref Dictionary<string,HashSet<string>> dependencies)
         {
+            var bundleName = packItem.BundleName;
+            var fileList = packItem.BuildSrcFileList(SrcDir);
             bool isCustomBundleName = !string.IsNullOrEmpty(bundleName) && bundleName.StartsWith("{0}");
             foreach (var file in fileList)
             {
@@ -97,6 +108,19 @@ namespace HOEngine.Editor.PackResources
                     {
                         result.Add(bundleName, new List<string>() {file});
                     }
+        
+                    if (packItem.CheckDependency)
+                    {
+                        var dependenciesArray = AssetDatabase.GetDependencies(file);
+                        foreach (var dependecy in dependenciesArray)
+                        {
+                            if (!dependencies.ContainsKey(dependecy))
+                            {
+                                dependencies.Add(dependecy,new HashSet<string>());
+                            }
+                            dependencies[dependecy].Add(bundleName);
+                        }
+                    }
                 }
                 else
                 {
@@ -104,14 +128,27 @@ namespace HOEngine.Editor.PackResources
                     {
                         result.Add(fileName, new List<string>() {file});
                     }
+                    if (packItem.CheckDependency)
+                    {
+                        var dependenciesArray = AssetDatabase.GetDependencies(file);
+                        foreach (var dependecy in dependenciesArray)
+                        {
+                            if (!dependencies.ContainsKey(dependecy))
+                            {
+                                dependencies.Add(dependecy,new HashSet<string>());
+                            }
+                            dependencies[dependecy].Add(fileName);
+                        }
+                    }
                 }
             }
         }
-
-        private void PackPerDirBundle(string bundleName,List<string> fileList, ref Dictionary<string, List<string>> result)
+        
+        private void PackPerDirBundle(HOEPackItem packItem,ref Dictionary<string, List<string>> result,ref Dictionary<string,HashSet<string>> dependencies)
         {
             var dirInfo = new Dictionary<string, List<string>>();
-
+            var fileList = packItem.BuildSrcFileList(SrcDir);
+            var bundleName = packItem.BundleName;
             foreach (var file in fileList)
             {
                 var topdir = Path.GetDirectoryName(file);
@@ -133,10 +170,26 @@ namespace HOEngine.Editor.PackResources
                 {
                     name = string.Format(bundleName, name);
                 }
-
+        
                 if (!result.ContainsKey(name))
                 {
                     result.Add(name,item.Value);
+                }
+
+                foreach (var file in item.Value)
+                {
+                    if (packItem.CheckDependency)
+                    {
+                        var dependenciesArray = AssetDatabase.GetDependencies(file);
+                        foreach (var dependecy in dependenciesArray)
+                        {
+                            if (!dependencies.ContainsKey(dependecy))
+                            {
+                                dependencies.Add(dependecy,new HashSet<string>());
+                            }
+                            dependencies[dependecy].Add(name);
+                        }
+                    }
                 }
             }
         }
