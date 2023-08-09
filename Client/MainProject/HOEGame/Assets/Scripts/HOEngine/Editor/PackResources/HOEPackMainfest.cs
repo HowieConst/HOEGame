@@ -68,6 +68,11 @@ namespace HOEngine.Editor.PackResources
         {
             var bundleName = packItem.BundleName;
             var fileList = packItem.BuildSrcFileList(SrcDir);
+
+            if (string.IsNullOrEmpty(bundleName))
+            {
+                //todo:整个必须配置bundle名称
+            }
             if (!string.IsNullOrEmpty(bundleName))
             {
                 if (!result.ContainsKey(bundleName))

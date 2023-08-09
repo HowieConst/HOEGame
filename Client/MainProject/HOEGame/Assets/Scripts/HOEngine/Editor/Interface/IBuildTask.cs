@@ -4,6 +4,6 @@
     {
         string BuildStepName { get; }
         
-        IBuildParameters getBuildParameters();
+        IBuildParameters GetBuildParameters();
     }
 }
