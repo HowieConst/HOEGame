@@ -2,7 +2,8 @@
 {
     public class GenerateBuildMapStep : IBuildAssetStep
     {
-        public string BuildAssetsStepName => "GenerateBuildMapStep";
+        public EBuildAssetStep BuildStep => EBuildAssetStep.GenerateBuildMapStep;
+
         public ReturnCode Run(IBuildAssetContent content)
         {
             throw new System.NotImplementedException();

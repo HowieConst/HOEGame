@@ -1,30 +1,30 @@
 ﻿using System.Collections.Generic;
 namespace HOEngine.Editor
 {
+    /// <summary>
+    /// BuildAsset 结果记录
+    /// </summary>
     public static class BuildAssetResult
     {
-        private static Dictionary<string, object[]> BuildAssetResutDic;
+        private static Dictionary<EBuildAssetStep, object[]> BuildAssetResutDic;
 
         public static void Start()
         {
             if (BuildAssetResutDic == null)
             {
-                BuildAssetResutDic = new Dictionary<string, object[]>();
+                BuildAssetResutDic = new Dictionary<EBuildAssetStep, object[]>();
             }
             BuildAssetResutDic.Clear();
         }
 
-        public static void PushBuildAssetResult(string buildAssetStepName,params object[] result)
+        public static void PushBuildAssetResult(EBuildAssetStep buildAssetStep,params object[] result)
         {
-            if (!BuildAssetResutDic.ContainsKey(buildAssetStepName))
-            {
-                BuildAssetResutDic.Add(buildAssetStepName,result);
-            }
+            BuildAssetResutDic.TryAdd(buildAssetStep, result);
         }
 
-        public static object[] PopBuildAssetResult(string buildAssetStepName,params object[] result)
+        public static object[] PopBuildAssetResult(EBuildAssetStep buildAssetStep,params object[] result)
         {
-            if (BuildAssetResutDic.TryGetValue(buildAssetStepName,out var datas))
+            if (BuildAssetResutDic.TryGetValue(buildAssetStep,out var datas))
             {
                return datas;
             }

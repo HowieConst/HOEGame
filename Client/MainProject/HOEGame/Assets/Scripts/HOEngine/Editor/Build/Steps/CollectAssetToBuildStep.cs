@@ -7,15 +7,19 @@ namespace HOEngine.Editor
 {
     public class CollectAssetToBuildStep :IBuildAssetStep
     {
-        public string BuildAssetsStepName => "CollectAssetToBuildStep";
         private const string SharedBundleName = "Shared_{0}";
         private const int SharedCount = 10;
+        public EBuildAssetStep BuildStep => EBuildAssetStep.CollectAssetToBuildStep;
+
         public ReturnCode Run(IBuildAssetContent content)
         {
             
             if (content.PackMainfestPath == null || content.PackMainfestPath.Count == 0)
                 return ReturnCode.SuccessNotReturn;
 
+
+            StopWatchUtils.StartWatch(BuildStep.ToString());
+            
 
             var result = new Dictionary<string, List<string>>();
             var dependencies = new Dictionary<string, HashSet<string>>();
@@ -48,8 +52,8 @@ namespace HOEngine.Editor
                 //多个
                 if (item.Value.Count >= 2)
                 {
-                    var assetpath = Path.GetFullPath(item.Key);
-                    var fileInfo = new FileInfo(assetpath);
+                    var assetPath = Path.GetFullPath(item.Key);
+                    var fileInfo = new FileInfo(assetPath);
                     if (fileInfo.Length > 2 * 1024 * 1024)
                     {
                         sharedAsset.Add(item.Key);
@@ -77,7 +81,7 @@ namespace HOEngine.Editor
                 }
             }
             
-            var assetBunldeBuilderList = new List<AssetBundleBuild>();
+            var assetBundleBuilderList = new List<AssetBundleBuild>();
             
             foreach (var item in sharedBundle)
             {
@@ -86,7 +90,7 @@ namespace HOEngine.Editor
                     assetBundleName = item.Key,
                     assetNames = item.Value.ToArray()
                 };
-                assetBunldeBuilderList.Add(bundleBuilder);
+                assetBundleBuilderList.Add(bundleBuilder);
             }
             foreach (var item in result)
             {
@@ -95,10 +99,11 @@ namespace HOEngine.Editor
                     assetBundleName = item.Key,
                     assetNames = item.Value.ToArray()
                 };
-                assetBunldeBuilderList.Add(bundleBuilder);
+                assetBundleBuilderList.Add(bundleBuilder);
             }
             
-            BuildAssetResult.PushBuildAssetResult(BuildAssetsStepName,assetBunldeBuilderList);
+            StopWatchUtils.Stop(BuildStep.ToString());
+            BuildAssetResult.PushBuildAssetResult(BuildStep,assetBundleBuilderList);
             
             return ReturnCode.Success;
         }

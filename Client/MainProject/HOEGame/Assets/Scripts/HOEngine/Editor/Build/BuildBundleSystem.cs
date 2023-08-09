@@ -2,6 +2,9 @@
 
 namespace HOEngine.Editor
 {
+    /// <summary>
+    /// BuildBundle 系统
+    /// </summary>
     public static class BuildBundleSystem
     {
         private static List<IBuildAssetStep> BuildAssetSteps = new List<IBuildAssetStep>();
@@ -11,7 +14,7 @@ namespace HOEngine.Editor
             BuildAssetSteps.Clear();
             BuildAssetSteps.Add(new BuildAssetPrepareStep());
             BuildAssetSteps.Add(new CollectAssetToBuildStep());
-            BuildAssetSteps.Add(new BuildAssetStep());
+            BuildAssetSteps.Add(new BuildAssetBundleStep());
 
             for (int i = 0; i < BuildAssetSteps.Count; i++)
             {

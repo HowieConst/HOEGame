@@ -3,12 +3,13 @@ using UnityEditor;
 
 namespace HOEngine.Editor
 {
-    public class BuildAssetStep :IBuildAssetStep
+    public class BuildAssetBundleStep :IBuildAssetStep
     {
-        public string BuildAssetsStepName => "BuildAssetStep";
+        public EBuildAssetStep BuildStep => EBuildAssetStep.BuildAssetBundleStep;
+
         public ReturnCode Run(IBuildAssetContent content)
         {
-            var collectAssetResult = BuildAssetResult.PopBuildAssetResult("CollectAssetToBuildStep");
+            var collectAssetResult = BuildAssetResult.PopBuildAssetResult(EBuildAssetStep.CollectAssetToBuildStep);
             if (collectAssetResult == null || collectAssetResult.Length == 0)
             {
                 return ReturnCode.SuccessNotReturn;
@@ -18,7 +19,7 @@ namespace HOEngine.Editor
             if (assetBundleBuilder == null || assetBundleBuilder.Count <= 0)
                 return ReturnCode.SuccessNotReturn;
             
-            var buildOutPath = BuildAssetResult.PopBuildAssetResult("BuildAssetPrepareStep");
+            var buildOutPath = BuildAssetResult.PopBuildAssetResult(EBuildAssetStep.BuildAssetPrepareStep);
             if (buildOutPath == null || buildOutPath.Length == 0)
                 return ReturnCode.SuccessNotReturn;
             var outPath = buildOutPath[0] as string;

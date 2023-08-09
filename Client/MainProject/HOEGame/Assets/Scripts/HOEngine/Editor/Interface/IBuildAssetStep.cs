@@ -5,7 +5,7 @@ namespace HOEngine.Editor
 {
     public interface IBuildAssetStep 
     {
-        string BuildAssetsStepName { get; }
+        EBuildAssetStep BuildStep { get; }
         
         ReturnCode Run(IBuildAssetContent content);
     }

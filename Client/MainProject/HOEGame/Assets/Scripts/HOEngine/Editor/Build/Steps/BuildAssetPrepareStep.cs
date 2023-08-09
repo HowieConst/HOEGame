@@ -5,21 +5,23 @@ namespace HOEngine.Editor
 {
     public class BuildAssetPrepareStep :IBuildAssetStep
     {
-        public string BuildAssetsStepName => "BuildAssetPrepareStep";
+        public EBuildAssetStep BuildStep => EBuildAssetStep.BuildAssetPrepareStep;
+        
         private const string BundleFolderName = "Bundles";
+
         public ReturnCode Run(IBuildAssetContent content)
         {
-            var PlatFormFolder = GetFolderNameByPlatForm(content);
-            if (string.IsNullOrEmpty(PlatFormFolder))
+            var platFormFolder = GetFolderNameByPlatForm(content);
+            if (string.IsNullOrEmpty(platFormFolder))
                 return ReturnCode.SuccessNotReturn;
-            var bundlePath = Application.dataPath + "/../../../"+BundleFolderName + "/"+PlatFormFolder;
+            var bundlePath = Application.dataPath + "/../../../"+BundleFolderName + "/"+platFormFolder;
     
             if (!Directory.Exists(bundlePath))
             {
                 Directory.CreateDirectory(bundlePath);
             }
             
-            BuildAssetResult.PushBuildAssetResult(BuildAssetsStepName,bundlePath);
+            BuildAssetResult.PushBuildAssetResult(BuildStep,bundlePath);
             
             return ReturnCode.Success;
         }

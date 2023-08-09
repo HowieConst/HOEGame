@@ -4,6 +4,9 @@ using UnityEditor;
 
 namespace HOEngine.Editor
 {
+    /// <summary>
+    /// BuildAsset 上下文参数
+    /// </summary>
     public class BuildAssetContent :IBuildAssetContent
     {
 
