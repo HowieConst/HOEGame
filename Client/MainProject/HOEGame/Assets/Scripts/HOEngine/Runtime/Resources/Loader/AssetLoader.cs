@@ -60,10 +60,12 @@ namespace HOEngine.Resources
 
         private void OnLoadAssetAsync()
         {
+            #if UNITY_EDITOR
             var type = ResourceManager.GetTypeByAssetType(AssetType);
             AssetObject = AssetDatabase.LoadAssetAtPath(AssetName,type);
             var assetObject = AssetManager.Instacne().LoadAsset(AssetName);
             assetObject?.SetResourceObject(AssetObject);
+            #endif
             LoaderStatus = ELoaderStatus.LoadFinish;
         }
 

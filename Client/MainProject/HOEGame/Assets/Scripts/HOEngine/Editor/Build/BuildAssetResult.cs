@@ -19,7 +19,14 @@ namespace HOEngine.Editor
 
         public static void PushBuildAssetResult(EBuildAssetStep buildAssetStep,params object[] result)
         {
-            BuildAssetResutDic.TryAdd(buildAssetStep, result);
+            if (!BuildAssetResutDic.ContainsKey(buildAssetStep))
+            {
+                BuildAssetResutDic.Add(buildAssetStep,result);
+            }
+            else
+            {
+                BuildAssetResutDic[buildAssetStep] = result;
+            }
         }
 
         public static object[] PopBuildAssetResult(EBuildAssetStep buildAssetStep,params object[] result)

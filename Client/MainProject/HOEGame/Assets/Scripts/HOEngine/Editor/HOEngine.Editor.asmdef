@@ -1,0 +1,19 @@
+{
+    "name": "HOEngine.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:59ff401c1915d544a9e05b70dfac9323",
+        "GUID:b3f49edfedc855a48aa1a9e5d3cba438"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

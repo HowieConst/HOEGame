@@ -14,13 +14,14 @@ namespace HOEngine.Editor
             var platFormFolder = GetFolderNameByPlatForm(content);
             if (string.IsNullOrEmpty(platFormFolder))
                 return ReturnCode.SuccessNotReturn;
-            var bundlePath = Application.dataPath + "/../../../"+BundleFolderName + "/"+platFormFolder;
+            var bundlePath = Application.dataPath + "/../../"+BundleFolderName + "/"+platFormFolder;
     
             if (!Directory.Exists(bundlePath))
             {
                 Directory.CreateDirectory(bundlePath);
             }
-            
+
+            bundlePath = bundlePath.Replace("\\", "/");
             BuildAssetResult.PushBuildAssetResult(BuildStep,bundlePath);
             
             return ReturnCode.Success;

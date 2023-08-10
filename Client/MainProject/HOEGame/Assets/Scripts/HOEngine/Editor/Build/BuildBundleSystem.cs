@@ -15,7 +15,7 @@ namespace HOEngine.Editor
             BuildAssetSteps.Add(new BuildAssetPrepareStep());
             BuildAssetSteps.Add(new CollectAssetToBuildStep());
             BuildAssetSteps.Add(new BuildAssetBundleStep());
-
+            BuildAssetSteps.Add(new GenerateBuildMapStep());
             for (int i = 0; i < BuildAssetSteps.Count; i++)
             {
                 var buildStep = BuildAssetSteps[i];
