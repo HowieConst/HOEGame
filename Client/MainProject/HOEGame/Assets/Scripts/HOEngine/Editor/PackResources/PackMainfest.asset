@@ -25,3 +25,4 @@ MonoBehaviour:
     CheckDependency: 0
     viewAssetsList:
     - Assets/Res/Prefabs/Cube.prefab
+    - Assets/Res/Prefabs/Sphere.prefab

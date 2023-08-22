@@ -2,6 +2,7 @@
 using UnityEngine;
 using YamlDotNet.RepresentationModel;
 using System.Collections.Generic;
+using System.Text;
 using JetBrains.Annotations;
 using NUnit.Framework;
 
@@ -14,26 +15,29 @@ namespace HOEngine.Editor
         private List<string> AllBundlesList = new List<string>();
         private Dictionary<string, List<string>> BundleAssets = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> BundleDependencies = new Dictionary<string, List<string>>();
+        private string BundleOutPutPath;
+        private const string BundleMapName = "BundleMap.txt";
+        private const string BundleInfo_Prefix = "&BundleInfo%;";
 
         public ReturnCode Run(IBuildAssetContent content)
         {
             var pathResult = BuildAssetResult.PopBuildAssetResult(EBuildAssetStep.BuildAssetPrepareStep);
             if (pathResult == null || pathResult.Length == 0)
                 return ReturnCode.SuccessNotReturn;
-            var bundleOutPath= pathResult[0] as string;
-            if (string.IsNullOrEmpty(bundleOutPath))
+            BundleOutPutPath= pathResult[0] as string;
+            if (string.IsNullOrEmpty(BundleOutPutPath))
                 return ReturnCode.SuccessNotReturn;
 
-            var index = bundleOutPath.LastIndexOf('/');
+            var index = BundleOutPutPath.LastIndexOf('/');
             if (index < 0)
                 return ReturnCode.SuccessNotReturn;
-            var manifestName = bundleOutPath.Substring(index + 1);
+            var manifestName = BundleOutPutPath.Substring(index + 1);
             if (string.IsNullOrEmpty(manifestName))
                 return ReturnCode.SuccessNotReturn;
 
             var fileName = $"{manifestName}{ManifestSuffix}";
 
-            var filePath = bundleOutPath + "/" + fileName;
+            var filePath = BundleOutPutPath + "/" + fileName;
 
             if (!File.Exists(filePath))
                 return ReturnCode.Error;
@@ -54,11 +58,11 @@ namespace HOEngine.Editor
             for (int i = 0; i < AllBundlesList.Count; i++)
             {
                 var bundleName = AllBundlesList[i];
-                var manifestFilePath =  $"{bundleOutPath}/{bundleName}{ManifestSuffix}";
+                var manifestFilePath =  $"{BundleOutPutPath}/{bundleName}{ManifestSuffix}";
                 ParseBundleManifest(bundleName,manifestFilePath,ref BundleAssets,ref BundleDependencies);
             }
 
-            DeleteAllManifestFile(bundleOutPath,manifestName);
+            DeleteAllManifestFile(BundleOutPutPath,manifestName);
 
 
             GenerateBundleMap();
@@ -115,7 +119,45 @@ namespace HOEngine.Editor
 
         private void GenerateBundleMap()
         {
+            if(AllBundlesList.Count == 0)
+                return;
+            var bundleMapPath = Path.Combine(BundleOutPutPath, BundleMapName);
+            if (File.Exists(bundleMapPath))
+            {
+                File.Delete(bundleMapPath);
+            }
+
+            var bundleMapBuilder = new StringBuilder();
+            for (int i = 0; i < AllBundlesList.Count; i++)
+            {
+                var bundleName = AllBundlesList[i];
+                var assetBundleInfo = new PackedBundleItem(BundleOutPutPath, bundleName);
+                var bundleStr = $"{assetBundleInfo.Name}|{assetBundleInfo.Size}|{assetBundleInfo.MD5}";
+                bundleMapBuilder.AppendLine(bundleStr);
+            }
+
+            bundleMapBuilder.AppendLine(BundleInfo_Prefix);
             
+            for (int i = 0; i < AllBundlesList.Count; i++)
+            {
+                var bundleName = AllBundlesList[i];
+                var assetList = new List<string>();
+                var dependencies = new List<string>();
+                if (BundleAssets.TryGetValue(bundleName, out var asset))
+                {
+                    assetList = asset;
+                }
+
+                if (BundleDependencies.TryGetValue(bundleName, out var dependency))
+                {
+                    if (dependency != null) dependencies = dependency;
+                }
+
+                var packedBundleInfo = new PackedBundleInfo(bundleName, assetList, dependencies);
+                bundleMapBuilder.Append(packedBundleInfo);
+            }
+            
+            File.WriteAllText(bundleMapPath,bundleMapBuilder.ToString());
         }
     }
 }
