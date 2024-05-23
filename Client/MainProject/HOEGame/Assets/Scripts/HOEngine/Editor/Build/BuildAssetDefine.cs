@@ -10,5 +10,6 @@
         BuildAssetBundleStep,
         GenerateBuildMapStep,
         BuildApk,
+        BuildApkOut,
     }
 }
