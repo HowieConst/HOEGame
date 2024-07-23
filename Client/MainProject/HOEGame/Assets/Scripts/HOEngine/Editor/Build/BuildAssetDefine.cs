@@ -9,5 +9,7 @@
         CollectAssetToBuildStep,
         BuildAssetBundleStep,
         GenerateBuildMapStep,
+        BuildApk,
+        BuildApkOut,
     }
 }
